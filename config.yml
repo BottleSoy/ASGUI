@@ -1,0 +1,46 @@
+default-gui: lobby #GUI默认物品打开的GUI
+default-item: clock #GUI默认物品
+gui: #下面每个子集都是一个GUI
+  lobby:
+    distance: 2.7 #展开距离
+    permission: default #权限,在前面加上"!"可以反向权限，如果不需要权限，把permission删了
+    entry:
+      "1": #一项内容，注意一下数字
+        name: '&a这是一个示例配置' #显示名称
+        focName: '&a这是一个示例配置，被获取焦点了' #焦点名称，必填
+        permission: default #权限,在前面加上"!"可以反向权限，如果不需要权限，把permission删了
+        command: #命令列表，可以多个命令一起执行
+          - "op:tp %player 0 100 0" #可以多命令，op表示以op权限执行,%player就是玩家
+        item:
+          v: 1519 #数字>1即可,1.13需要,1.12不需要
+          type: TNT #物品
+      "2":
+        name: test2
+        focName: 'test22'
+        permission: default
+        
+        item: 
+          v: 1519
+          type: DIAMOND_PICKAXE
+  test:
+    distance: 3
+    entry:
+      "1":
+        name: '&a这是一个示例配置2'
+        focName: '&a这是一个示例配置2，被获取焦点了'
+        permission: default
+        command:
+          - "server:lobby" #可以多命令，server:表示以去某个服务器
+        item:
+          v: 1519
+          type: STONE
+      "2":
+        name: '&a这是一个示例配置2'
+        focName: '&a这是一个示例配置2，被获取焦点了'
+        permission: default
+        command:
+          - "console:say" #可以多命令，console表示以控制台执行命令
+        item:
+          v: 1519
+          type: BLUE_WOOl
+    
