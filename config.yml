@@ -1,46 +1,51 @@
-default-gui: lobby #GUI默认物品打开的GUI
-default-item: clock #GUI默认物品
+default-gui: example1 #未指定打开菜单时打开的默认菜单
+default-item: clock #GUI默认打开菜单的物品，如不需要，则写AIR
 gui: #下面每个子集都是一个GUI
-  lobby:
-    distance: 2.7 #展开距离
-    permission: default #权限,在前面加上"!"可以反向权限，如果不需要权限，把permission删了
+  example1:
+    distance: 2.7 #物品展开距离
+    permission: default #打开菜单所需权限，如果需要反向权限，在前面加"!"表示无该权限的玩家可以打开，不检测权限则删除本行
+    moveable: false #打开菜单后是否可以移动，设置为true时菜单仍然可以通过传送、退出而关闭。设置为false时GUI会在玩家移动0.2格之后关闭
     entry:
-      "1": #一项内容，注意一下数字
-        name: '&a这是一个示例配置' #显示名称
-        focName: '&a这是一个示例配置，被获取焦点了' #焦点名称，必填
-        permission: default #权限,在前面加上"!"可以反向权限，如果不需要权限，把permission删了
-        command: #命令列表，可以多个命令一起执行
-          - "op:tp %player 0 100 0" #可以多命令，op表示以op权限执行,%player就是玩家
+      "1": #菜单案例物品1
+        name: '&aexample1案例物品1' #默认显示名称
+        focName: '&6example1你正看着案例物品1' #指向该物品时显示的名称
+        permission: default #该物品显示所需权限，可在前面加"!"表示反向，也可删除本行
+        command: #点击执行的命令
+          #- "op:time set day" #可以op身份执行指令
+          - "server:lobby" #可点击跨服
+          #- "console:reload" #可以控制台身份执行指令
+          #- "spawn" #可以普通玩家身份执行指令
         item:
-          v: 1519 #数字>1即可,1.13需要,1.12不需要
-          type: TNT #物品
-      "2":
-        name: test2
-        focName: 'test22'
+          type: TNT #物品名称
+      "2": #菜单案例物品2
+        name: '&aexample1案例物品2'
+        focName: '&6example1你正看着案例物品2'
         permission: default
-        
+        command: #点击执行的命令
+          #- "op:time set day" #可以op身份执行指令
+          #- "server:lobby" #可点击跨服
+          #- "console:reload" #可以控制台身份执行指令
+          - "spawn" #可以普通玩家身份执行指令
         item: 
-          v: 1519
           type: DIAMOND_PICKAXE
-  test:
+  example2:
     distance: 3
+    moveable: true
     entry:
-      "1":
-        name: '&a这是一个示例配置2'
-        focName: '&a这是一个示例配置2，被获取焦点了'
+      item1:
+        name: '&aexample2案例物品1'
+        focName: '&6example2你正看着案例物品1'
         permission: default
         command:
           - "server:lobby" #可以多命令，server:表示以去某个服务器
         item:
-          v: 1519
           type: STONE
-      "2":
-        name: '&a这是一个示例配置2'
-        focName: '&a这是一个示例配置2，被获取焦点了'
+      item2:
+        name: '&aexample2案例物品2'
+        focName: '&6example2你正看着案例物品2'
         permission: default
         command:
-          - "console:say" #可以多命令，console表示以控制台执行命令
+          - "console:say §aexample2案例物品2" #可以多命令，console表示以控制台执行命令，注意文本颜色符号
         item:
-          v: 1519
           type: BLUE_WOOl
     

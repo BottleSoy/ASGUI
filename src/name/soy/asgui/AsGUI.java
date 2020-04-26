@@ -3,6 +3,8 @@ package name.soy.asgui;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import me.clip.placeholderapi.PlaceholderAPI;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,9 +15,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -39,9 +43,10 @@ public class AsGUI extends JavaPlugin implements Listener {
 	String defaultguiname;
 	Material defaultItem;
 	private static AsGUI instance;
-
+	boolean hasPAPI = false;
 	public void onEnable() {
 		instance = this;
+		
 		saveDefaultConfig();
 		reloadConfig();
 		for (String key : getConfig().getConfigurationSection("gui").getKeys(false)) {
@@ -79,7 +84,6 @@ public class AsGUI extends JavaPlugin implements Listener {
 				if (args.length >= 2 && this.guiList.containsKey(args[1]) && !this.openGui.containsKey(p)) {
 					boolean flag;//表示能否打开
 					GUI gui = this.guiList.get(args[1]);
-
 					if (gui.permission == null) {
 						flag = true;
 					} else if (gui.permission.startsWith("!")) {
@@ -112,6 +116,26 @@ public class AsGUI extends JavaPlugin implements Listener {
 				getServer().getPluginManager().disablePlugin(this);
 				getServer().getPluginManager().enablePlugin(this);
 				sender.sendMessage("[AsGUI] AsGUI reload done");
+			}else if(args[0].equals("clear") && sender.hasPermission("asgui.clear")) {
+				for(World w:getServer().getWorlds()) {
+					for(Entity e:w.getEntities()) {
+						if(e.getScoreboardTags().contains("as-gui-item")) {
+							e.remove();
+						}
+					}
+				}
+			}else if(args[0].equals("help")) {
+				sender.sendMessage("§e=======§b全息菜单命令指南§e=======");
+				sender.sendMessage("§6/gui open <name> §1打开菜单,name缺省打开默认菜单");
+				sender.sendMessage("§6/gui close §1关闭当前菜单");
+				if(sender.hasPermission("asgui.reload"))
+					sender.sendMessage("§6/gui reload §1重新载入菜单配置");
+				
+				if(sender.hasPermission("asgui.clear")) {
+					sender.sendMessage("§6/gui clear §1清除菜单");
+					sender.sendMessage("§c<警告>在没必要时不要使用,作用是如遇到服务器崩溃的时候，清除菜单物品使用");
+				}
+				
 			}
 			
 		}
@@ -120,7 +144,7 @@ public class AsGUI extends JavaPlugin implements Listener {
 	}
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		String[] args0 = new String[] {"open","close","reload","execute"};
+		String[] args0 = new String[] {"open","close","help","reload","clear"};
 		//System.out.println(Arrays.asList(args));
 		if(args.length==1) {
 			List<String> ss= Arrays.asList(args0);
@@ -139,19 +163,30 @@ public class AsGUI extends JavaPlugin implements Listener {
 	public static AsGUI getPlugin() {
 		return instance;
 	}
-
+	//移动之后，就要关闭GUI了
 	@EventHandler(ignoreCancelled = true)
 	public void move(PlayerMoveEvent e) { 
 		if (this.openGui.containsKey(e.getPlayer())) {
 			UserGUI gui = (UserGUI) this.openGui.get(e.getPlayer());
-			gui.focus(e.getTo().getYaw());
 			if (!gui.openLocation.getWorld().equals(e.getTo().getWorld())
-					|| gui.openLocation.distance(e.getTo()) > 0.2D) {
-				((UserGUI) this.openGui.remove(e.getPlayer())).close();
+					|| gui.openLocation.distance(e.getTo()) > 0.1D) {
+				if(!gui.what.moveable)
+					((UserGUI) this.openGui.remove(e.getPlayer())).close();
+				else {
+					gui.openLocation.setX(e.getTo().getX());
+					gui.openLocation.setY(e.getTo().getY());
+					gui.openLocation.setZ(e.getTo().getZ());
+				}
 			}
+			gui.focus(e.getTo().getYaw());
 		}
 	}
-
+	public String PAPIed(Player who,String text) {
+		text = text.replace('&', '§').replace("§§","&");
+		if(hasPAPI)
+			return PlaceholderAPI.setPlaceholders(who, text);
+		else return text;
+	}
 	@EventHandler(ignoreCancelled = true)
 	public void teleport(PlayerTeleportEvent e) {
 		if (this.openGui.containsKey(e.getPlayer())) {
@@ -197,14 +232,14 @@ public class AsGUI extends JavaPlugin implements Listener {
 					gui.foc.execute();
 			} else {
 				ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
-				if(is.getType().equals(defaultItem)) {
+				if(is.getType().equals(defaultItem)&&!defaultItem.equals(Material.AIR)) {
 					this.openGui.put(e.getPlayer(), this.guiList.get(defaultguiname).showToPlayer(e.getPlayer()));
 					e.setCancelled(true);
 				}
 			}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void interact(PlayerInteractAtEntityEvent e) {
 		for (UserGUI gui : this.openGui.values()) {
 			for (UserGUIEntry<?> entry : gui.openEntries) {

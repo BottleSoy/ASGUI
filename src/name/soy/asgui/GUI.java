@@ -2,6 +2,8 @@ package name.soy.asgui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -12,6 +14,7 @@ public class GUI {
 	public List<GUIEntry> entries;
 	public double distance;
 	public String permission;
+	public boolean moveable;
 
 	public UserGUI showToPlayer(Player who) {
 		return (new UserGUI(who, this)).open();
@@ -28,6 +31,7 @@ public class GUI {
 		try {
 			gui.distance = config.getDouble("distance");
 			gui.permission = config.getString("permission");
+			gui.moveable = config.getBoolean("moveable");
 			ConfigurationSection entries = config.getConfigurationSection("entry");
 			gui.entries = new ArrayList<>(entries.getKeys(false).size());
 			int pos = 0;
@@ -36,11 +40,13 @@ public class GUI {
 					ConfigurationSection entry = entries.getConfigurationSection(key);
 					GUIEntry entry1 = new GUIEntry();
 					entry1.at = pos;
-					entry1.namejson = entry.getString("name");
-					entry1.item = ItemStack.deserialize(entry.getConfigurationSection("item").getValues(false));
+					entry1.name = entry.getString("name");
+					Map<String, Object> o = entry.getConfigurationSection("item").getValues(false);
+					o.put("v", 1519);
+					entry1.item = ItemStack.deserialize(o);
 					entry1.permission = entry.getString("permission");
 					entry1.cmds = entry.getStringList("command");
-					entry1.focusjson = entry.getString("focName");
+					entry1.focus = entry.getString("focName");
 					gui.entries.add(entry1);
 				}
 				pos++;

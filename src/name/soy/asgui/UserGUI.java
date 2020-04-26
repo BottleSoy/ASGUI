@@ -77,7 +77,7 @@ public class UserGUI {
 			}
 		}
 		int c = 0;
-		this.previus = -2;
+		this.previus = 0;
 		for (int i = 0; i < this.what.entries.size(); i++) {
 
 			GUIEntry entry = (GUIEntry) this.what.entries.get(i);
@@ -95,26 +95,40 @@ public class UserGUI {
 	}
 
 	public void focus(float yaw) {
-		yaw %= 360.0F;
-		yaw = (yaw < 0.0F) ? (yaw + 360.0F) : yaw;
+		while(yaw<=0)yaw+=360;
+		while(yaw>360)yaw-=360;
+		yaw = 360 -yaw;
 		for (UserGUIEntry<?> e : this.openEntries) {
-			double r = (360.0D / this.openCount * e.nowat + this.openLocation.getYaw()) % 360.0D;
-			r = (r < 0.0D) ? (r + 360.0D) : r;
-
-			double d = yaw + r;
-			if (Math.abs(360.0D - Math.abs(d)) < (180 / this.openCount)) {
+			
+			double range = 360 / openCount / 2;
+			double degrees = Math.toDegrees(e.radian);
+			while(degrees>360)degrees-=360;
+			while(degrees<=0)degrees+=360;
+			boolean inmax = degrees+range>=360;
+			boolean inmin = degrees-range<0;
+			boolean looked = false;
+			if(inmax)
+				if(degrees+range-360>yaw)looked = true;
+			if(inmin)
+				if(degrees-range+360<yaw)looked = true;
+			if(yaw<=degrees+range&&yaw>degrees-range)looked = true;
+			
+			if (looked) {
 				if (this.foc == null) {
 					this.foc = e;
 					this.foc.getFocus();
 					continue;
 				}
 				if (!this.foc.equals(e)) {
-
 					e.getFocus();
 					this.foc.lostFocus();
 					this.foc = e;
+					
 				}
 			}
+//			if(Bukkit.getWorlds().get(0).getTime()%15==0) {
+//				who.sendMessage(e.entry.name+":"+range+"->"+inmax+","+inmin+"<-"+degrees+":yaw:"+yaw);
+//			}
 		}
 	}
 }

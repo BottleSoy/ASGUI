@@ -6,8 +6,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class GUIEntry
 {
-  String namejson;
-  String focusjson;
+  String name;
+  String focus;
   String permission;
   List<String> cmds;
   ItemStack item;

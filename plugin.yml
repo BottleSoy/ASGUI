@@ -3,5 +3,6 @@ main: name.soy.asgui.AsGUI
 version: 1.0
 author: soy_bottle
 api-version: 1.13
+softdepend: [PlaceholderAPI]
 commands: 
   gui: 

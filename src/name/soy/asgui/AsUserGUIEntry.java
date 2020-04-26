@@ -29,7 +29,7 @@ public class AsUserGUIEntry extends UserGUIEntry<GUIEntry> {
 	ArmorStand item;
 
 	ItemStack sitem;
-
+	boolean inexecute = false;
 	public boolean show() {
 		if (this.entry.canshow(this.who)) {
 			double radian = Math
@@ -45,11 +45,9 @@ public class AsUserGUIEntry extends UserGUIEntry<GUIEntry> {
 			this.as.setGravity(false);
 			//盔甲架太吵了，安静一点.
 			this.as.setSilent(true);
-			
+			this.as.addScoreboardTag("as-gui-item");
 			this.as.setInvulnerable(true);
-			
-			this.as.setCustomName(this.entry.namejson);
-			
+			this.as.setCustomName(AsGUI.getPlugin().PAPIed(who, this.entry.name));
 			this.as.setCustomNameVisible(true);
 			this.as.setMarker(false);
 			if (!this.sitem.getType().isBlock()) {
@@ -71,20 +69,20 @@ public class AsUserGUIEntry extends UserGUIEntry<GUIEntry> {
 	}
 
 	public void getFocus() {
-		this.as.setCustomName(this.entry.focusjson);
+		this.as.setCustomName(AsGUI.getPlugin().PAPIed(who,this.entry.focus));
 		this.sitem.addUnsafeEnchantment(Enchantment.MENDING, 1);
 		(this.entry.item.getType().isBlock() ? this.as : this.item).setHelmet(this.sitem);
 	}
 
 	public void lostFocus() {
-		this.as.setCustomName( this.entry.namejson);
+		this.as.setCustomName(AsGUI.getPlugin().PAPIed(who,this.entry.name));
 		this.sitem.removeEnchantment(Enchantment.MENDING);
 		(this.entry.item.getType().isBlock() ? this.as : this.item).setHelmet(this.sitem);
 	}
 
 	public void update() {
 		if (this.as != null) {
-			double radian = Math
+			radian = Math
 					.toRadians(360.0D / this.userGUI.openCount * this.nowat + this.userGUI.openLocation.getYaw());
 			double distance = this.userGUI.what.distance / 20.0D * this.userGUI.radius;
 			Vector vec = new Vector(Math.sin(radian) * distance, 0.0D, Math.cos(radian) * distance);
@@ -110,6 +108,9 @@ public class AsUserGUIEntry extends UserGUIEntry<GUIEntry> {
 	}
 
 	public void execute() {
+		if(inexecute)return;
+		inexecute = true;
+		Bukkit.getScheduler().runTaskLater(AsGUI.getPlugin(), ()->inexecute=false, 5);
 		for (String s : this.entry.cmds) {
 			
 			if (s.startsWith("server:")) {
@@ -117,10 +118,11 @@ public class AsUserGUIEntry extends UserGUIEntry<GUIEntry> {
 				continue;
 			}
 			if (s.startsWith("op:")) {
+				boolean stillop = who.isOp();
 				who.setOp(true);
 				Bukkit.dispatchCommand(who,
 						s.substring(3).replace("%player", this.who.getName()));
-				who.setOp(false);
+				who.setOp(stillop);
 				continue;
 			}
 			if (s.startsWith("console:")) {

@@ -14,6 +14,7 @@ public abstract class UserGUIEntry<T extends GUIEntry>
   protected Player who;
   protected UserGUI userGUI;
   protected float nowat;
+  protected double radian;
   
   public UserGUIEntry(UserGUI gui, T entry) {
     this.entry = entry;
